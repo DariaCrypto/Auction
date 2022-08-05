@@ -23,7 +23,7 @@ contract Council {
     }
     Transaction[] public transactions;
 
-    modifier onlyOwner() {
+    modifier onlyOwners() {
         require(isOwner[msg.sender], "Council: You are't owner");
         _;
     }
@@ -70,9 +70,7 @@ contract Council {
         address _to,
         uint256 _value,
         bytes memory _data
-    ) public onlyOwner {
-        uint256 txId = transactions.length;
-
+    ) public onlyOwners {
         transactions.push(
             Transaction({
                 to: _to,
@@ -85,7 +83,7 @@ contract Council {
         );
     }
 
-    function voteTransaction(uint256 txId, bool answer) external onlyOwner {
+    function voteTransaction(uint256 txId, bool answer) external onlyOwners {
         Transaction storage tX = transactions[txId];
         tX.status = StatusTransaction.VOTE;
         answer ? ++tX.numConfirmations : --tX.numConfirmations;
@@ -94,7 +92,7 @@ contract Council {
 
     function excecuteTransaction(uint256 txId)
         external
-        onlyOwner
+        onlyOwners
         txExists(txId)
         notExecuted(txId)
     {
@@ -111,11 +109,11 @@ contract Council {
         require(success, "Council: Transaction fail");
     }
 
-    function includeToCouncil(address account) external onlyOwner {
+    function includeToCouncil(address account) external onlyOwners {
         isOwner[account] = true;
     }
 
-    function excludeFromCouncil(address account) external onlyOwner {
+    function excludeFromCouncil(address account) external onlyOwners {
         isOwner[account] = false;
     }
 }
