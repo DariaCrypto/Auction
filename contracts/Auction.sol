@@ -1,8 +1,8 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IBidToken.sol";
 
-contract Auction is Ownable {
+contract Auction {
     enum StatusBid {
         UNDEFINE,
         TRADE,
@@ -30,11 +30,11 @@ contract Auction is Ownable {
         uint256 amountBuyToken
     );
 
-    address[] owners;
     uint256 immutable minAmount;
     uint256 idBid;
 
     address bidToken;
+    address council;
     uint8 platformFee;
 
     uint256 allFee;
@@ -44,46 +44,36 @@ contract Auction is Ownable {
     mapping(uint256 => Bid) bids;
     mapping(uint256 => Winner) winnerBid;
     mapping(address => bool) memberList;
-    mapping(address => bool) isOwner;
     mapping(address => mapping(uint256 => uint256)) bidAmount;
-
-    modifier onlyOwners() {
-        require(isOwner[msg.sender], "Council: You are't owner");
-        _;
-    }
 
     modifier onlyMembers() {
         require(memberList[msg.sender], "Council: You are't member");
         _;
     }
 
+    modifier onlyContract() {
+        require(msg.sender == council, "Council: You are't council");
+        _;
+    }
+
     constructor(
+        address counsil_,
         address bidToken_,
         uint256 minAmount_,
-        uint8 platformFee_,
-        address[] memory owners_
+        uint8 platformFee_
     ) {
         bidToken = bidToken_;
         minAmount = minAmount_;
         //fee to platform
+        council = counsil_;
         platformFee = platformFee_;
-
-        for (uint256 i = 0; i < owners_.length; i++) {
-            address owner = owners_[i];
-
-            require(owner != address(0), "Council: Invalid owner");
-            require(!isOwner[owner], "Council: Owner not unique");
-
-            isOwner[owner] = true;
-            owners.push(owner);
-        }
     }
 
     function createBid(
         address NFT,
         uint256 endTime_,
         uint24 minAmount_
-    ) external onlyOwners {
+    ) external onlyContract {
         Bid storage bid = bids[idBid];
         bid.NFT = NFT;
         bid.endTime = block.timestamp + endTime_;
@@ -93,7 +83,7 @@ contract Auction is Ownable {
         emit CreateBid(idBid, NFT, block.timestamp + endTime_, minAmount_);
     }
 
-    function closeBid(uint256 id) external onlyOwners {
+    function closeBid(uint256 id) external onlyContract {
         Bid storage bid = bids[id];
         require(bid.status == StatusBid.TRADE, "Bid is buy");
         bid.status = StatusBid.BUY;
