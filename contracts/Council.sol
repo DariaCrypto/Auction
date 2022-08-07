@@ -3,6 +3,7 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Council {
+    address auction;
     address[] owners;
     uint256 internal minConfrimVoice;
     mapping(address => bool) isOwner;
@@ -15,11 +16,9 @@ contract Council {
         FAIL
     }
     struct Transaction {
-        address to;
         bytes data;
         bool executed;
         uint256 numConfirmations;
-        uint256 value;
         StatusTransaction status;
     }
     Transaction[] public transactions;
@@ -67,17 +66,30 @@ contract Council {
         minConfrimVoice = minConfrimVoice_;
     }
 
-    function addTransaction(
-        address _to,
-        uint256 _value,
-        bytes memory _data
-    ) public onlyOwners {
+    //TODO: Move this functionality to the backend
+    function getDataCreateBid(
+        string memory signature,
+        address NFT,
+        uint256 endTime_,
+        uint24 minAmount_
+    ) public pure returns (bytes memory) {
+        return abi.encodeWithSignature(signature, NFT, endTime_, minAmount_);
+    }
+
+    //TODO: Move this functionality to the backend
+    function getDataCloseBid(string memory signature, uint256 id)
+        public
+        pure
+        returns (bytes memory)
+    {
+        return abi.encodeWithSignature(signature, id);
+    }
+
+    function addTransaction(bytes memory _data) public onlyOwners {
         transactions.push(
             Transaction({
-                to: _to,
                 data: _data,
                 executed: false,
-                value: _value,
                 numConfirmations: 0,
                 status: StatusTransaction.CREATE
             })
@@ -103,11 +115,15 @@ contract Council {
             "Council: This transaction had little approval"
         );
 
-        (bool success, ) = tX.to.call{value: 0}(tX.data);
+        (bool success, ) = auction.call{value: 0}(tX.data);
         success
             ? tX.status = StatusTransaction.SUCCESS
             : tX.status = StatusTransaction.FAIL;
         require(success, "Council: Transaction fail");
+    }
+
+    function setAuctionAddress(address auction_) external onlyOwners {
+        auction = auction_;
     }
 
     function includeToCouncil(address account) external onlyOwners {

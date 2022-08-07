@@ -36,11 +36,10 @@ contract Auction {
     address bidToken;
     address council;
     uint8 platformFee;
-
+    uint256 constant PRICE_TO_BID = 0.3 ether;
     uint256 allFee;
     uint256 allPayToMember;
 
-    uint256 priceToBid = 0.3 ether;
     mapping(uint256 => Bid) bids;
     mapping(uint256 => Winner) winnerBid;
     mapping(address => bool) memberList;
@@ -109,11 +108,11 @@ contract Auction {
         emit PlaceForBet(msg.sender, amount, id);
     }
 
-    function addMemberForBid(address guest) external payable {
-        require(msg.value >= priceToBid, "Your amount is small");
+    function addMemberForBid() external payable {
+        require(msg.value >= PRICE_TO_BID, "Your amount is small");
         allPayToMember += msg.value;
-        memberList[guest] = true;
-        emit AddMemberForBid(guest, msg.value);
+        memberList[msg.sender] = true;
+        emit AddMemberForBid(msg.sender, msg.value);
     }
 
     function buyBidToken() external payable onlyMembers {
