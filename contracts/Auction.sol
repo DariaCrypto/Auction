@@ -47,12 +47,12 @@ contract Auction {
     mapping(address => mapping(uint256 => uint256)) bidAmount;
 
     modifier onlyMembers() {
-        require(memberList[msg.sender], "Council: You are't member");
+        require(memberList[msg.sender], "Auction: You are't member");
         _;
     }
 
     modifier onlyContract() {
-        require(msg.sender == council, "Council: You are't council");
+        require(msg.sender == council, "Auction: You are't council");
         _;
     }
 
