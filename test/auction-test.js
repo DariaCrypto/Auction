@@ -38,6 +38,8 @@ describe("Auction test", function () {
         await expect(council.addTransaction(callFunc)).to.be.revertedWith("Council: You are't owner");
         await expect(auction.createBid(testNFT.address, 300, 1)).to.be.revertedWith("Auction: You are't council");
         await council.connect(addr1).addTransaction(callFunc);
+        await expect(council.connect(addr1).excecuteTransaction(0)).to.be.revertedWith("Council: This transaction had little approval");
+        await council.connect(addr1).voteTransaction(0, true);
     });
 
 });

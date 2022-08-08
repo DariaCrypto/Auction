@@ -21,6 +21,8 @@ contract Council {
         uint256 numConfirmations;
         StatusTransaction status;
     }
+
+    //TODO: remove array from contract
     Transaction[] public transactions;
 
     modifier onlyOwners() {
@@ -98,6 +100,11 @@ contract Council {
 
     function voteTransaction(uint256 txId, bool answer) external onlyOwners {
         Transaction storage tX = transactions[txId];
+        require(
+            tX.executed == false,
+            "Council: You need to create a transaction"
+        );
+        //optimize gas
         tX.status = StatusTransaction.VOTE;
         answer ? ++tX.numConfirmations : --tX.numConfirmations;
         isConfirmed[txId][msg.sender] = answer;
@@ -119,7 +126,8 @@ contract Council {
         success
             ? tX.status = StatusTransaction.SUCCESS
             : tX.status = StatusTransaction.FAIL;
-        require(success, "Council: Transaction fail");
+        tX.executed = true;
+        //require(success, "Council: Transaction fail");
     }
 
     function setAuctionAddress(address auction_) external onlyOwners {
