@@ -21,10 +21,11 @@ contract Council {
         uint256 numConfirmations;
         StatusTransaction status;
     }
+    event ExcecuteTransaction(uint256 txId, StatusTransaction status);
 
     //TODO: remove array from contract
     Transaction[] public transactions;
-
+    uint256 public counter;
     modifier onlyOwners() {
         require(isOwner[msg.sender], "Council: You are't owner");
         _;
@@ -87,7 +88,7 @@ contract Council {
         return abi.encodeWithSignature(signature, id);
     }
 
-    function addTransaction(bytes memory _data) public onlyOwners {
+    function addTransaction(bytes calldata _data) public onlyOwners {
         transactions.push(
             Transaction({
                 data: _data,
@@ -104,9 +105,9 @@ contract Council {
             tX.executed == false,
             "Council: You need to create a transaction"
         );
-        //optimize gas
+        //check to optimize gas! STORAGE
         tX.status = StatusTransaction.VOTE;
-        answer ? ++tX.numConfirmations : --tX.numConfirmations;
+        if (answer) ++tX.numConfirmations;
         isConfirmed[txId][msg.sender] = answer;
     }
 
@@ -127,7 +128,7 @@ contract Council {
             ? tX.status = StatusTransaction.SUCCESS
             : tX.status = StatusTransaction.FAIL;
         tX.executed = true;
-        //require(success, "Council: Transaction fail");
+        emit ExcecuteTransaction(txId, tX.status);
     }
 
     function setAuctionAddress(address auction_) external onlyOwners {
@@ -140,5 +141,29 @@ contract Council {
 
     function excludeFromCouncil(address account) external onlyOwners {
         isOwner[account] = false;
+    }
+
+    function getTransactionCount() public view returns (uint256) {
+        return transactions.length;
+    }
+
+    function getTransaction(uint256 _txIndex)
+        public
+        view
+        returns (
+            bytes memory data,
+            bool executed,
+            uint256 numConfirmations,
+            StatusTransaction status
+        )
+    {
+        Transaction storage transaction = transactions[_txIndex];
+
+        return (
+            transaction.data,
+            transaction.executed,
+            transaction.numConfirmations,
+            transaction.status
+        );
     }
 }
