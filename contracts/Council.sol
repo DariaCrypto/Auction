@@ -22,7 +22,11 @@ contract Council {
         StatusTransaction status;
     }
     event ExcecuteTransaction(uint256 txId, StatusTransaction status);
-
+    event AddTransaction(uint256 idTx, bytes data);
+    event VoteToTransaction(uint256 idTx, address voter, bool answer);
+    event SetAuctionAddress(address auction);
+    event IncludeToCouncil(address account);
+    event ExcludeToCouncil(address account);
     //TODO: remove array from contract
     Transaction[] public transactions;
     uint256 public counter;
@@ -55,7 +59,7 @@ contract Council {
             minConfrimVoice_ > 0 && minConfrimVoice_ <= owners_.length,
             "Council: Invalid number of required confirmations"
         );
-        //Additional check addresses(maybe remove this fragment)
+
         for (uint256 i = 0; i < owners_.length; i++) {
             address owner = owners_[i];
 
@@ -69,26 +73,7 @@ contract Council {
         minConfrimVoice = minConfrimVoice_;
     }
 
-    //TODO: Move this functionality to the backend
-    function getDataCreateBid(
-        string memory signature,
-        address NFT,
-        uint256 endTime_,
-        uint24 minAmount_
-    ) public pure returns (bytes memory) {
-        return abi.encodeWithSignature(signature, NFT, endTime_, minAmount_);
-    }
-
-    //TODO: Move this functionality to the backend
-    function getDataCloseBid(string memory signature, uint256 id)
-        public
-        pure
-        returns (bytes memory)
-    {
-        return abi.encodeWithSignature(signature, id);
-    }
-
-    function addTransaction(bytes calldata _data) public onlyOwners {
+    function addTransaction(bytes memory _data) public onlyOwners {
         transactions.push(
             Transaction({
                 data: _data,
@@ -97,6 +82,7 @@ contract Council {
                 status: StatusTransaction.CREATE
             })
         );
+        emit AddTransaction(transactions.length, _data);
     }
 
     function voteTransaction(uint256 txId, bool answer) external onlyOwners {
@@ -109,6 +95,7 @@ contract Council {
         tX.status = StatusTransaction.VOTE;
         if (answer) ++tX.numConfirmations;
         isConfirmed[txId][msg.sender] = answer;
+        emit VoteToTransaction(txId, msg.sender, answer);
     }
 
     function excecuteTransaction(uint256 txId)
@@ -133,37 +120,16 @@ contract Council {
 
     function setAuctionAddress(address auction_) external onlyOwners {
         auction = auction_;
+        emit SetAuctionAddress(auction_);
     }
 
     function includeToCouncil(address account) external onlyOwners {
         isOwner[account] = true;
+        emit IncludeToCouncil(account);
     }
 
     function excludeFromCouncil(address account) external onlyOwners {
         isOwner[account] = false;
-    }
-
-    function getTransactionCount() public view returns (uint256) {
-        return transactions.length;
-    }
-
-    function getTransaction(uint256 _txIndex)
-        public
-        view
-        returns (
-            bytes memory data,
-            bool executed,
-            uint256 numConfirmations,
-            StatusTransaction status
-        )
-    {
-        Transaction storage transaction = transactions[_txIndex];
-
-        return (
-            transaction.data,
-            transaction.executed,
-            transaction.numConfirmations,
-            transaction.status
-        );
+        emit ExcludeToCouncil(account);
     }
 }

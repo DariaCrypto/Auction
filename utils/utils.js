@@ -21,6 +21,15 @@ async function getBlockTime(ethers) {
     return time;
 }
 
+async function getABICreateBidFunction() {
+    const ABI = ["function createBid(address NFT, uint256 endTime_, uint24 minAmount_)"];
+    const interface = new ethers.utils.Interface(ABI);
+    const txData = await interface.encodeFunctionData("createBid", [arguments[0], arguments[1], arguments[2]]);
+    return txData;
+}
+
+
+
 const prepareContract = async () => {
     const MINTABLE_AMOUNT = BigNumber.from(8_000_000);
     const PLATFORM_FEE = 2;
@@ -48,13 +57,12 @@ const prepareContract = async () => {
     auction = await Auction.deploy(council.address, bidToken.address, utils.parseEther('0.3'), PLATFORM_FEE);
     await auction.deployed();
 
-
-
     return [testNFT, council, auction, bidToken];
 };
 module.exports = {
     prepareContract,
     getBlockTime,
     timeShift,
-    timeShiftBy
+    timeShiftBy,
+    getABICreateBidFunction
 };
