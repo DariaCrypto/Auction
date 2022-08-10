@@ -37,8 +37,11 @@ contract Auction {
     address council;
     uint8 platformFee;
     uint256 constant PRICE_TO_BID = 0.3 ether;
+
+    //Check gas! Maybe union varables in one struct
     uint256 allFee;
     uint256 allPayToMember;
+    /////
 
     mapping(uint256 => Bid) bids;
     mapping(uint256 => Winner) winnerBid;
@@ -46,12 +49,12 @@ contract Auction {
     mapping(address => mapping(uint256 => uint256)) bidAmount;
 
     modifier onlyMembers() {
-        require(memberList[msg.sender], "Auction: You are't member");
+        require(memberList[msg.sender], "Auction: You aren't member");
         _;
     }
 
     modifier onlyContract() {
-        require(msg.sender == council, "Auction: You are't council");
+        require(msg.sender == council, "Auction: You aren't council");
         _;
     }
 
@@ -84,7 +87,7 @@ contract Auction {
 
     function closeBid(uint256 id) external onlyContract {
         Bid storage bid = bids[id];
-        require(bid.status == StatusBid.TRADE, "Bid is buy");
+        require(bid.status != StatusBid.BUY, "Bid is buy");
         bid.status = StatusBid.BUY;
         Winner storage win = winnerBid[id];
         emit CloseBid(id, win.winerBid);
@@ -92,7 +95,7 @@ contract Auction {
 
     function placeBet(uint256 amount, uint256 id) external onlyMembers {
         Bid storage bid = bids[id];
-        require(bid.status == StatusBid.TRADE, "Bid is buy");
+        require(bid.status != StatusBid.BUY, "Bid is buy");
 
         require(amount >= bid.minAmountforBid, "Your amount is less");
         require(
@@ -108,22 +111,18 @@ contract Auction {
         emit PlaceForBet(msg.sender, amount, id);
     }
 
-    function addMemberForBid() external payable {
-        require(msg.value >= PRICE_TO_BID, "Your amount is small");
-        allPayToMember += msg.value;
-        memberList[msg.sender] = true;
-        emit AddMemberForBid(msg.sender, msg.value);
-    }
-
-    function buyBidToken() external payable onlyMembers {
+    function buyBidToken() external payable {
         require(
-            msg.value >= minAmount,
+            msg.value >= PRICE_TO_BID,
             "Auction: Invested amount is too small"
         );
         uint256 feeAmount = _calcPercent(msg.value, platformFee);
         allFee += feeAmount;
         uint256 cleanAmount = msg.value - feeAmount;
+
         uint256 amountBuyToken = cleanAmount / IBidToken(bidToken).getPrice();
+        allPayToMember += msg.value;
+        memberList[msg.sender] = true;
         IBidToken(bidToken).transferFrom(bidToken, msg.sender, amountBuyToken);
         emit BuyBidToken(msg.sender, feeAmount, amountBuyToken);
     }

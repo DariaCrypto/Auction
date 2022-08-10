@@ -31,7 +31,7 @@ contract Council {
     Transaction[] public transactions;
     uint256 public counter;
     modifier onlyOwners() {
-        require(isOwner[msg.sender], "Council: You are't owner");
+        require(isOwner[msg.sender], "Council: You aren't owner");
         _;
     }
 

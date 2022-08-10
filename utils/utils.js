@@ -50,7 +50,7 @@ const prepareContract = async () => {
 
     //BidToken
     BidToken = await ethers.getContractFactory("BidToken");
-    bidToken = await BidToken.deploy(utils.parseEther('0.00000001'), MINTABLE_AMOUNT);
+    bidToken = await BidToken.deploy(utils.parseEther('0.1'), MINTABLE_AMOUNT);
     await bidToken.deployed();
 
 
