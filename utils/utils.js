@@ -28,13 +28,20 @@ async function getABICreateBidFunction() {
     return txData;
 }
 
+async function getABICloseBidFunction() {
+    const ABI = ["function closeBid(uint256 id)"];
+    const interface = new ethers.utils.Interface(ABI);
+    const txData = await interface.encodeFunctionData("closeBid", [arguments[0]]);
+    return txData;
+}
+
 
 
 const prepareContract = async () => {
     const MINTABLE_AMOUNT = BigNumber.from(8_000_000);
     const PLATFORM_FEE = 2;
     const MIN_CONFRIM_VOICE = 3;
-    [owner, addr1, addr2, addr3, addr4, addr5, ...addrs] = await ethers.getSigners();
+    [owner, member1, member2, member3, member4, member5, ...addrs] = await ethers.getSigners();
 
     //Mock_NFT
     TestNFT = await ethers.getContractFactory("TestNFT");
@@ -49,7 +56,7 @@ const prepareContract = async () => {
 
     // Council
     Council = await ethers.getContractFactory("Council");
-    council = await Council.deploy([addr1.address, addr2.address, addr3.address, addr4.address, addr5.address], MIN_CONFRIM_VOICE);
+    council = await Council.deploy([member1.address, member2.address, member3.address, member4.address, member5.address], MIN_CONFRIM_VOICE);
     await council.deployed();
 
     // Auction
@@ -64,5 +71,6 @@ module.exports = {
     getBlockTime,
     timeShift,
     timeShiftBy,
-    getABICreateBidFunction
+    getABICreateBidFunction,
+    getABICloseBidFunction
 };
