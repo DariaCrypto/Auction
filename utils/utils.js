@@ -48,12 +48,6 @@ const prepareContract = async () => {
     testNFT = await TestNFT.deploy();
     await testNFT.deployed();
 
-    //BidToken
-    BidToken = await ethers.getContractFactory("BidToken");
-    bidToken = await BidToken.deploy(utils.parseEther('0.1'), MINTABLE_AMOUNT);
-    await bidToken.deployed();
-
-
     // Council
     Council = await ethers.getContractFactory("Council");
     council = await Council.deploy([member1.address, member2.address, member3.address, member4.address, member5.address], MIN_CONFRIM_VOICE);
@@ -61,9 +55,15 @@ const prepareContract = async () => {
 
     // Auction
     Auction = await ethers.getContractFactory("Auction");
-    auction = await Auction.deploy(council.address, bidToken.address, utils.parseEther('0.3'), PLATFORM_FEE);
+    auction = await Auction.deploy(council.address, utils.parseEther('0.3'), PLATFORM_FEE);
     await auction.deployed();
 
+    //BidToken
+    BidToken = await ethers.getContractFactory("BidToken");
+    bidToken = await BidToken.deploy(utils.parseEther('0.1'), MINTABLE_AMOUNT, auction.address);
+    await bidToken.deployed();
+
+    auction.setToken(bidToken.address);
     return [testNFT, council, auction, bidToken];
 };
 module.exports = {

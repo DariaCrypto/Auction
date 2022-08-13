@@ -60,11 +60,9 @@ contract Auction {
 
     constructor(
         address counsil_,
-        address bidToken_,
         uint256 minAmount_,
         uint8 platformFee_
     ) {
-        bidToken = bidToken_;
         minAmount = minAmount_;
         //fee to platform
         council = counsil_;
@@ -120,11 +118,15 @@ contract Auction {
         allFee += feeAmount;
         uint256 cleanAmount = msg.value - feeAmount;
 
-        uint256 amountBuyToken = cleanAmount / IBidToken(bidToken).getPrice();
+        uint256 amountBuyToken = (cleanAmount / IBidToken(bidToken).getPrice());
         allPayToMember += msg.value;
         memberList[msg.sender] = true;
-        IBidToken(bidToken).transferFrom(bidToken, msg.sender, amountBuyToken);
+        IBidToken(bidToken).transfer(msg.sender, amountBuyToken);
         emit BuyBidToken(msg.sender, feeAmount, amountBuyToken);
+    }
+
+    function setToken(address tokenAddress) external {
+        bidToken = tokenAddress;
     }
 
     function _calcPercent(uint256 value, uint256 percent)

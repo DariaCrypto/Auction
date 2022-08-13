@@ -18,11 +18,12 @@ const {
 const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 let AMOUNT_ETH = utils.parseEther('1');
 let SMALL_AMOUNT_ETH = utils.parseEther('0.1');
+let FEE_PLATFORM = 2;
 describe("Auction test", function () {
     beforeEach(async function () {
         [owner, council1, council2, council3, council4, council5, council6, member1, member2, member3, member4, member5, ...addrs] = await ethers.getSigners();
         [testNFT, council, auction, bidToken] = await prepareContract();
-        let allowAmount = BigInt(100 * 1e18);
+        let allowAmount = BigInt(100000 * 1e18);
         await bidToken.approve(member1.address, allowAmount);
         await bidToken.approve(member2.address, allowAmount);
         await bidToken.approve(member3.address, allowAmount);
@@ -50,6 +51,9 @@ describe("Auction test", function () {
         await expect(auction.placeBet(100, 0)).to.be.rejectedWith("Auction: You aren't member");
         await auction.connect(member1)["buyBidToken()"]({ value: AMOUNT_ETH });
         await expect(auction.connect(member1).placeBet(100, 0)).to.be.rejectedWith("You don't have a lot of tokens");
+        amountBidToken = parseFloat(0.98 / utils.parseEther('0.1')).toString();
+        expectResult = await bidToken.balanceOf(member1.address);
+        expect(expectResult.toString()).to.be.equal(amountBidToken);
 
     });
 
