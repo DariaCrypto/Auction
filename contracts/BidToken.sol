@@ -17,6 +17,10 @@ contract BidToken is ERC20, Ownable {
         _mint(mintAddress, amountMint);
     }
 
+    function decimals() public view override returns (uint8) {
+        return 18;
+    }
+
     function setPrice(uint256 price_) external onlyOwner {
         require(price_ > 0, "Price can't equal 0");
         price = price_;

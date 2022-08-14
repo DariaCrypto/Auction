@@ -50,10 +50,10 @@ describe("Auction test", function () {
         await council.connect(council3).excecuteTransaction(0);
         await expect(auction.placeBet(100, 0)).to.be.rejectedWith("Auction: You aren't member");
         await auction.connect(member1)["buyBidToken()"]({ value: AMOUNT_ETH });
-        await expect(auction.connect(member1).placeBet(100, 0)).to.be.rejectedWith("You don't have a lot of tokens");
-        amountBidToken = parseFloat(0.98 / utils.parseEther('0.1')).toString();
-        expectResult = await bidToken.balanceOf(member1.address);
-        expect(expectResult.toString()).to.be.equal(amountBidToken);
+        await expect(auction.connect(member1).placeBet(utils.parseEther('100'), 0)).to.be.rejectedWith("You don't have a lot of tokens");
+        amountBidToken = utils.parseEther('0.98') / utils.parseEther('0.1');
+        expectResult = await bidToken.balanceOf(member1.address) / 1e18;
+        expect(expectResult.toString()).to.be.equal(amountBidToken.toString());
 
     });
 

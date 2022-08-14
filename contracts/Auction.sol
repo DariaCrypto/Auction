@@ -29,7 +29,7 @@ contract Auction {
         uint256 feeAmount,
         uint256 amountBuyToken
     );
-
+    uint256 public PRECISION = 1e18;
     uint256 immutable minAmount;
     uint256 idBid;
 
@@ -118,7 +118,8 @@ contract Auction {
         allFee += feeAmount;
         uint256 cleanAmount = msg.value - feeAmount;
 
-        uint256 amountBuyToken = (cleanAmount / IBidToken(bidToken).getPrice());
+        uint256 amountBuyToken = ((cleanAmount * PRECISION) /
+            IBidToken(bidToken).getPrice());
         allPayToMember += msg.value;
         memberList[msg.sender] = true;
         IBidToken(bidToken).transfer(msg.sender, amountBuyToken);

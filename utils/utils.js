@@ -38,7 +38,7 @@ async function getABICloseBidFunction() {
 
 
 const prepareContract = async () => {
-    const MINTABLE_AMOUNT = BigNumber.from(8_000_000);
+    const MINTABLE_AMOUNT = BigNumber.from(8_000_000).mul(BigNumber.from("10").pow(18)).toString();
     const PLATFORM_FEE = 2;
     const MIN_CONFRIM_VOICE = 3;
     [owner, member1, member2, member3, member4, member5, ...addrs] = await ethers.getSigners();
