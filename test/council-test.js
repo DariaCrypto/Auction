@@ -23,19 +23,19 @@ describe("Council test", function () {
         [testNFT, council, auction, bidToken] = await prepareContract();
     });
 
-    it("Council: Should't call function createBid(address, uint256, uint24)", async () => {
+    it("Council: Shouldn't call function createBid(address, uint256, uint24)", async () => {
         await expect(auction.createBid(testNFT.address, 300, 1)).to.be.revertedWith("Auction: You aren't council");
     });
 
-    it("Council: Should't call function closeBid( uint256)", async () => {
+    it("Council: Shouldn't call function closeBid( uint256)", async () => {
         await expect(auction.closeBid(1)).to.be.revertedWith("Auction: You aren't council");
     });
 
-    it("Council: Should't call function closeBid( uint256)", async () => {
+    it("Council: Shouldn't call function closeBid( uint256)", async () => {
         await expect(auction.closeBid(1)).to.be.revertedWith("Auction: You aren't council");
     });
 
-    it("Council: Should't call fucntion excecuteTransaction(uint256) because council doesn't approve", async () => {
+    it("Council: Shouldn't call fucntion excecuteTransaction(uint256) because council doesn't approve", async () => {
         let callFunc = getABICreateBidFunction(testNFT.address, 50, 100);
         await expect(council.addTransaction(callFunc)).to.be.revertedWith("Council: You aren't owner");
         await expect(auction.createBid(testNFT.address, 300, 1)).to.be.revertedWith("Auction: You aren't council");

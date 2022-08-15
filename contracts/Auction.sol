@@ -10,7 +10,6 @@ contract Auction {
     }
 
     struct Bid {
-        uint256 endTime;
         uint24 minAmountforBid;
         address NFT;
         StatusBid status;
@@ -29,7 +28,7 @@ contract Auction {
         uint256 feeAmount,
         uint256 amountBuyToken
     );
-    uint256 public PRECISION = 1e18;
+    uint256 internal PRECISION = 1e18;
     uint256 immutable minAmount;
     uint256 idBid;
 
@@ -38,10 +37,8 @@ contract Auction {
     uint8 platformFee;
     uint256 constant PRICE_TO_BID = 0.3 ether;
 
-    //Check gas! Maybe union varables in one struct
     uint256 allFee;
     uint256 allPayToMember;
-    /////
 
     mapping(uint256 => Bid) bids;
     mapping(uint256 => Winner) winnerBid;
@@ -64,7 +61,6 @@ contract Auction {
         uint8 platformFee_
     ) {
         minAmount = minAmount_;
-        //fee to platform
         council = counsil_;
         platformFee = platformFee_;
     }
@@ -76,7 +72,6 @@ contract Auction {
     ) external onlyContract {
         Bid storage bid = bids[idBid];
         bid.NFT = NFT;
-        bid.endTime = block.timestamp + endTime_;
         bid.minAmountforBid = minAmount_;
         bid.status = StatusBid.TRADE;
         ++idBid;
@@ -94,7 +89,6 @@ contract Auction {
     function placeBet(uint256 amount, uint256 id) external onlyMembers {
         Bid storage bid = bids[id];
         require(bid.status != StatusBid.BUY, "Bid is buy");
-
         require(amount >= bid.minAmountforBid, "Your amount is less");
         require(
             IBidToken(bidToken).balanceOf(msg.sender) >= amount,
