@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 import "./interfaces/IBidToken.sol";
+import "./interfaces/IERC721NFT.sol";
 
 contract Auction {
     enum StatusBid {
@@ -144,6 +145,7 @@ contract Auction {
         require(bid.status != StatusBid.BUY, "Auction: Bet is buy");
         bid.status = StatusBid.BUY;
         Winner storage win = winnerBid[id];
+        IERC721(bid.NFT).safeTransferFrom(address(this), win.winerBid, id);
         emit CloseBid(id, win.winerBid);
     }
 
